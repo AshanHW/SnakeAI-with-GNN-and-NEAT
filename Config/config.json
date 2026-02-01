@@ -1,0 +1,30 @@
+{
+  "Game": {
+    "Rows": 25,
+    "Cols": 25,
+    "MaxStepsPerFood": 75
+  },
+
+  "AIParameters": {
+    "Generations": 1000,
+    "PopulationSize": 500,
+    "CompatibilityThreshold": 0.2,
+    "VisualSpeed": 50
+  },
+
+  "Fitness": {
+    "FoodReward": 1000,
+    "DistanceReward": 2.0,
+    "DeathPenalty": 300,
+    "EfficiencyBonus": 1.0
+  },
+
+  "Neat": {
+    "C1": 1.0,
+    "C2": 1.0,
+    "C3": 0.4,
+    "WeightMutationRate": 0.8,
+    "AddConnectionRate": 0.1,
+    "AddNodeRate": 0.1
+  }
+}
