@@ -6,17 +6,34 @@ namespace SnakeGame
 {
     public class SnakeTrainer
     {
-        GenomeHandler handler;
+        public GenomeHandler handler;
         public int Generation { get; private set; }
-        public SnakeTrainer()
+        public int maxStepsFood;
+        public double CompatibilityThreshold;
+        public double deathPenalty;
+        public double distanceReward;
+        public double foodReward;
+        public double effReward;
+
+        public SnakeTrainer(int populationSize, double[] coeffs, double[] mutationParams, int maxStepsFood, double compThreshold,
+            double deathPenalty, double distanceReward, double foodReward, double effReward)
         {
             handler = new GenomeHandler(
-                numOfgenomes: 500,
+                numOfgenomes: populationSize,
                 numOfInputnodes: 11,
                 numOfOutputnodes: 3,
                 initMode: WeightInitMode.RandomUniform,
-                compatibilityCoeffs: new double[] { 1, 1, 0.4 },
-                MutationParams: new double[] { 1.0, 0.001, 0.001 });
+                compatibilityCoeffs: coeffs,
+                MutationParams: mutationParams);
+
+            this.maxStepsFood = maxStepsFood;
+            this.CompatibilityThreshold = compThreshold;
+
+            this.deathPenalty = deathPenalty;
+            this.distanceReward = distanceReward;
+            this.foodReward = foodReward;
+            this.effReward = effReward;
+
         }
         public Genome TrainOneGeneration()
         {
@@ -24,8 +41,6 @@ namespace SnakeGame
 
             Genome bestGenome = null;
             double bestFitness = double.MinValue;
-
-            const int MAX_STEPS_PER_FOOD = 75;
 
             foreach (var IdGenome in handler.Genomes)
             {
@@ -39,7 +54,7 @@ namespace SnakeGame
 
                 Position food = agent.FindFood(game);
 
-                while (!game.GameOver && stepsSinceLastFood < MAX_STEPS_PER_FOOD)
+                while (!game.GameOver && stepsSinceLastFood < maxStepsFood)
                 {
                     var dir = agent.Decide(game);
                     Position prevHead = game.HeadPosition();
@@ -55,7 +70,8 @@ namespace SnakeGame
 
                     int distBefore = Math.Abs(prevHead.Row - food.Row) + Math.Abs(prevHead.Col - food.Col);
                     int distAfter = Math.Abs(newHead.Row - newFood.Row) + Math.Abs(newHead.Col - newFood.Col);
-                    f += (distBefore - distAfter) * 1;
+                    // Progress towards food reward
+                    f += (distBefore - distAfter) * distanceReward;
 
                     if (game.Score > foodCount)
                     {
@@ -64,18 +80,18 @@ namespace SnakeGame
                         stepsSinceLastFood = 0;
 
                         // Strong reward for eating
-                        f += 1000;
+                        f += foodReward;
 
                         // Efficiency bonus
-                        f += (MAX_STEPS_PER_FOOD - stepsToFood) * 1.0;
+                        f += (maxStepsFood - stepsToFood) * effReward;
                     }
                     food = newFood;
                 }
                 // Penalty
-                if (game.GameOver)
-                    f -= 500;
-                else if (stepsSinceLastFood >= MAX_STEPS_PER_FOOD)
-                    f -= 1000;
+                if (game.GameOver || stepsSinceLastFood >= maxStepsFood)
+                { 
+                    f -= deathPenalty;
+                };
 
                 fitness[genome.ID] = f;
                 if (f > bestFitness)
@@ -84,7 +100,7 @@ namespace SnakeGame
                     bestGenome = genome;
                 }
             }
-            handler.EvolveOneGeneration(fitness, 0.2);
+            handler.EvolveOneGeneration(fitness, CompatibilityThreshold);
             Generation++;
 
             return bestGenome;
