@@ -17,6 +17,13 @@
     <None Remove="Assets\Food.png" />
     <None Remove="Assets\Head.png" />
     <None Remove="Assets\icon.ico" />
+    <None Remove="Config\config.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Config\config.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
@@ -34,6 +41,10 @@
     <Resource Include="Assets\Food.png" />
     <Resource Include="Assets\Head.png" />
     <Resource Include="Assets\icon.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Checkpoints\" />
   </ItemGroup>
 
 </Project>
